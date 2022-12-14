@@ -1,0 +1,439 @@
+# Configuration file for Python scripts.
+#
+# Each entry specifies a Python script that will be installed as cron job and
+# run by the *launcher* in the specified docker container.
+#
+# Contents are defined as follows:
+#     - args (array, optional): The script's command line arguments
+#
+#     - comment (str, optional): Optional comment which is ignored.
+#
+#     - cron (str, required): `cron` field definitions. See CRONTAB(5) man page.
+#
+#     - destination (str, optional): Required if running script as a Job. Name
+#         of the destination application of this ETL process.
+#
+#     - docker_cmd (str, required): name of the DOCKER cmd configration that will
+#         run the script. See `config/docker`. If ommitted will use "default" DOCKER
+#         config
+#
+#     - enabled (bool, optional): If a cron entry should written for this script.
+#         If false or absent the entry will be ignored.
+#
+#     - filename (str, required): The filename of the script.
+#
+#     - init_func(str, required): The name of function which will be imported and
+#       run via the launcher. Typicall "main" or "init".
+#
+#     - job (bool, optional): If the script shall be registered as a "job" on the job
+#         logging server. Any script that supports job logging must accept a special
+#         "last_run_date" paramater to support incremental loading. See README for
+#         details.
+#
+#     - name: Text idenfier of the script. Will be used to name the cron shell script
+#         and *must be unique* to all script entries. | required
+#
+#     - path (string, required): The path *relative to this repository* where the script
+#         is located.
+#
+#     - source (str, optional): Required if running script as a Job. Name
+#         of the source application of this ETL process.
+#
+---
+detection_status_signals:
+  args:
+    - data_tracker_prod
+  cron: 50 3 * * *
+  destination: knack
+  enabled: true
+  filename: detection_status_signals.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+cameras_json:
+  args:
+    - cameras
+    - data_tracker_prod
+  cron: 3 5 * * *
+  destination: json
+  enabled: true
+  filename: knack_json.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+dms_msg_pub:
+  args:
+    - data_tracker_prod
+  cron: 21 * * * *
+  destination: knack
+  enabled: true
+  filename: dms_msg_pub.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: kits
+esb_xml_gen_data_tracker:
+  args:
+    - data_tracker_prod
+  cron: 1-59/5 * * * *
+  destination: xml
+  enabled: true
+  filename: esb_xml_gen.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+esb_xml_send_data_tracker:
+  args:
+    - data_tracker_prod
+  cron: 3-59/5 * * * *
+  destination: ESB
+  enabled: true
+  filename: esb_xml_send.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+esb_xml_gen_signs_markings:
+  args:
+    - signs_markings_prod
+  cron: 2-59/5 * * * *
+  destination: xml
+  enabled: true
+  filename: esb_xml_gen.py
+  init_func: main
+  job: true
+  path: ../transportation-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+esb_xml_send_signs_markings:
+  args:
+    - signs_markings_prod
+  cron: 4-59/5 * * * *
+  destination: ESB
+  enabled: true
+  filename: esb_xml_send.py
+  init_func: main
+  job: true
+  path: ../transportation-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+kits_cctv_push:
+  cron: 25 * * * *
+  destination: kits
+  enabled: true
+  filename: kits_cctv_push.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+location_updater:
+  args:
+    - data_tracker_prod
+  cron: 20 * * * *
+  destination: knack
+  enabled: true
+  filename: location_updater.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+radar_count_pub:
+  cron: 5-59/15 * * * *
+  destination: socrata
+  enabled: true
+  filename: radar_count_pub.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/open_data
+  source: kits
+secondary_signals_updater:
+  args:
+    - data_tracker_prod
+  cron: 25 2 * * *
+  destination: knack
+  enabled: true
+  filename: secondary_signals_updater.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+signal_pm_copier:
+  args:
+    - data_tracker_prod
+  cron: 20 2 * * *
+  destination: knack
+  enabled: true
+  filename: signal_pm_copier.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+signal_request_evals:
+  args:
+    - signal_request_evals
+    - data_tracker_prod
+    - -d
+    - socrata
+    - --last_run_date
+    - "0"
+  cron: 37 * * * *
+  destination: socrata
+  enabled: true
+  filename: knack_data_pub.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/open_data
+  source: knack
+signal_request_evals_weekly:
+  args:
+    - signal_request_evals
+    - data_tracker_prod
+    - -d
+    - socrata
+    - --replace
+    - --last_run_date
+    - "0"
+  comment:
+    This is a redundant weekly replace to act as a catch-all to make sure all
+    signal request evals are updated.
+  cron: 4 * * * thu
+  destination: socrata
+  enabled: true
+  filename: knack_data_pub.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/open_data
+  source: knack
+signal_request_ranker_phb:
+  args:
+    - phb
+    - data_tracker_prod
+  cron: 45 2 * * *
+  destination: knack
+  enabled: true
+  filename: signal_request_ranker.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+signal_request_ranker_traffic_signals:
+  args:
+    - traffic_signal
+    - data_tracker_prod
+  cron: 40 2 * * *
+  destination: knack
+  enabled: true
+  filename: signal_request_ranker.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+signal_requests:
+  args:
+    - signal_requests
+    - data_tracker_prod
+    - -d
+    - agol
+    - --last_run_date
+    - "0"
+  cron: 40 * * * *
+  destination: agol
+  enabled: true
+  filename: knack_data_pub.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/open_data
+  source: knack
+street_seg_updater:
+  args:
+    - data_tracker_prod
+    - --last_run_date
+    - 0
+  cron: 45 * * * *
+  destination: knack
+  enabled: true
+  filename: street_seg_updater.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+timed_corridors:
+  args:
+    - timed_corridors
+    - data_tracker_prod
+    - -d
+    - socrata
+    - --replace
+    - --last_run_date
+    - "0"
+  comment:
+    Always replace this datastet because we don't know for certain when it
+    was modified
+  cron: 35 2 * * *
+  destination: socrata
+  enabled: true
+  filename: knack_data_pub.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/open_data
+  source: knack
+traffic_reports:
+  cron: "*/5 * * * *"
+  destination: postgrest
+  enabled: true
+  filename: traffic_reports.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: rss
+traffic_reports_pub:
+  args:
+    - traffic_reports
+    - -d
+    - socrata
+    - --last_run_date
+    - "0"
+  cron: 6-59/5 * * * *
+  destination: socrata
+  enabled: true
+  filename: pgrest_data_pub.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/open_data
+  source: postgrest
+traffic_study_locations:
+  cron: 50 3 * * *
+  destination: socrata
+  enabled: true
+  filename: traffic_study_locations.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/traffic_study
+  source: agol
+visitor_log_socrata:
+  args:
+    - atd_visitor_log
+    - visitor_sign_in_prod
+    - -d
+    - socrata
+    - --last_run_date
+    - "0"
+  cron: 00 2 * * *
+  destination: socrata
+  enabled: true
+  filename: knack_data_pub.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/open_data
+  source: knack
+pr_copier:
+  cron: "*/1 * * * *"
+  destination: finance-admin-portal
+  enabled: true
+  filename: pr_copier.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/finance_admin
+  source: finance-admin-portal
+finance_master_agreements:
+  args:
+    - master_agreements
+    - finance_admin_prod
+  cron: "01 5 * * *"
+  destination: finance-admin-portal
+  enabled: true
+  filename: finance_scraper.py
+  init_func: main
+  job: true
+  path: ../finance-scraper
+  source: controllers_office
+finance_objects:
+  args:
+    - objects
+    - finance_admin_prod
+  cron: "07 5 * * *"
+  destination: finance-admin-portal
+  enabled: true
+  filename: finance_scraper.py
+  init_func: main
+  job: true
+  path: ../finance-scraper
+  source: controllers_office
+finance_units:
+  args:
+    - units
+    - finance_admin_prod
+  cron: "11 5 * * *"
+  destination: finance-admin-portal
+  enabled: true
+  filename: finance_scraper.py
+  init_func: main
+  job: true
+  path: ../finance-scraper
+  source: controllers_office
+sr_due_date_data_tracker:
+  args:
+    - data_tracker_prod
+  cron: "07 4 * * *"
+  destination: knack
+  enabled: true
+  filename: sr_due_date.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+sr_due_date_signs_markings:
+  args:
+    - signs_markings_prod
+  cron: "11 4 * * *"
+  destination: knack
+  enabled: true
+  filename: sr_due_date.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+sr_asset_assign:
+  args:
+    - signals
+    - data_tracker_prod
+  cron: "* * * * *"
+  destination: knack
+  enabled: true
+  filename: sr_asset_assign.py
+  init_func: main
+  job: true
+  path: ../atd-data-publishing/transportation-data-publishing/data_tracker
+  source: knack
+wt_insert_lake:
+  cron: 0 1 * * *
+  destination: raw
+  docker_cmd: atd-data-lake-etl0
+  enabled: true
+  filename: wt_insert_lake.py
+  init_func: main
+  job: true
+  path: ../atd-data-lake/atd_data_lake
+  source: atd-data-lake
+  args:
+  - --last_run_date
+  - "0"
+  - --start_date
+  - "10"
+gs_insert_lake:
+  cron: 30 1 * * *
+  destination: raw
+  docker_cmd: atd-data-lake-etl0
+  enabled: true
+  filename: gs_insert_lake.py
+  init_func: main
+  job: true
+  path: ../atd-data-lake/atd_data_lake
+  source: atd-data-lake
+  args:
+  - --last_run_date
+  - "0"
+  - --start_date
+  - "10"
+
